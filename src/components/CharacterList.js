@@ -1,29 +1,44 @@
 import React, { useEffect, useState } from "react";
+import CharacterCard from './CharacterCard';
+import SearchForm from './SearchForm';
 import Axios from "axios";
 
 export default function CharacterList() {
-  const [characters, setCharacters] = useState([]);
+  const [character, setCharacter] = useState([]);
+  const [searchWord, setSearchWord] = useState('');
   
 
   useEffect(() => {
 
     Axios
     .get('https://rickandmortyapi.com/api/character/')
-    then(response => {
+    .then(response => {
+      console.log(response);
       setCharacter(response.data.results);
     })
     .catch(error => {console.log ('Major Error');
   });
-  }, []);
+  }, [searchWord]);
 
-  if(!character){
-    return <div>Loading Character...
-    </div>
-  }
-  else { 
-   return 
-    <section className="character-list grid-view">
-      <h2>{character.map((person) => <CharacterCard key = {person.id}{...person} /> )}</h2>
+   return (
+    <div>
+    <SearchForm onSearch={setSearchWord} />
+    <section className="grid-view">
+      {
+        character.map(character => {
+          return (
+            <CharacterCard
+              key={character.id}
+              name={character.name}
+              status={character.status}
+              species={character.species}
+              image={character.image}
+              location={character.location.name}
+              origin={character.origin.name} />
+          )
+        })
+      }
     </section>
-  ;}
+    </div>
+   );
 }
