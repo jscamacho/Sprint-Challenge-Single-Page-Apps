@@ -1,56 +1,71 @@
-import React, { useState } from "react";
-import { Form } from 'semantic-ui-react';
+import React, { useState } from 'react'
+import Axios from 'axios'
+import { Card, Icon, Image } from 'semantic-ui-react'
+import { Link } from 'react-router-dom'
 
-  export default function SearchForm(props) {
-    const [searchTerm, setSearchTerm] = useLocalStorage('');
-    const {onSearch} = props;
-  
-    const handleInputChange = event => {
-      setSearchTerm(event.target.value);
-    }
-  
-    const handleSubmit = event => {
-      event.preventDefault();
-      onSearch(`?name=${searchTerm}`);
-    }
-  
-    
-    function useLocalStorage(key, initialValue) {
-      const [storedValue, setStoredValue] = useState(() => {
-        try {
-          const item = window.localStorage.getItem(key);
-          return item ? JSON.parse(item) : initialValue;
-        } catch (error) {
-          console.log('major error');
-          return initialValue;
-        }
-      });
+export default function SearchForm() {
 
-      const setValue = value => {
-        try {
-          const valueToStore =
-            value instanceof Function ? value(storedValue) : value;
-          setStoredValue(valueToStore);
-          window.localStorage.setItem(key, JSON.stringify(valueToStore));
-        } catch (error) {
-          console.log('major error');
-        }
-      };
-  
-      return [storedValue, setValue];
-    }
-    return (
-      <section className="search-form">
-         <Form onSubmit={event => handleSubmit(event)}>
-        <Form.Field
-          control='input'
-          onChange={handleInputChange}
-          placeholder="Search by Name"
-          value={searchTerm}
-          name="searchterm"
+  const [name, setName] = useState('')
+  const [search, setSearch] = useState([])
+
+  function onSearch(name) {
+    Axios.get(`https://rickandmortyapi.com/api/character/?name=${name}`).then(
+      res => {
+        setSearch(res.data.results)
+        console.log('search', res.data.results)
+      }
+    )
+  }
+
+  const handleInputChange = e => {
+    setName(e.target.value)
+  }
+
+  return (
+    <section className='search-form'>
+      <form
+        onSubmit={event => {
+          event.preventDefault()
+          onSearch(name)
+        }}
+      >
+        <input
+         onChange={event => handleInputChange(event)}
+         placeholder='name'
+         value={name}
+         name='name'
         />
-        <button type="submit">Search</button>
-        </Form>
+         <button type='submit'>Search</button>
+      </form>
+      <div className='character-list grid-view'>
+        {search.map(search => {
+          return (
+            <div>
+              <Card>
+                <Image src={search.image} wrapped ui={false} />
+                <Card.Content>
+                  <Card.Header>{search.name}</Card.Header>
+                  <Card.Meta>
+                    {search.species} {search.status}
+                  </Card.Meta>
+                  <Card.Description>
+                    Location: {search.location.name}
+                  </Card.Description>
+                  <Card.Description>
+                    Origin: {search.origin.name}
+                  </Card.Description>
+                </Card.Content>
+                <Card.Content extra>
+                  <Link exact to='/episode'>
+                    <Icon name='user' />
+                    Episodes
+                  </Link>
+                </Card.Content>
+              </Card>
+            </div>
+          )
+        })}
+      </div>
     </section>
-  );
-}
+     )
+    }
