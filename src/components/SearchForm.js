@@ -14,6 +14,7 @@ import { Form } from 'semantic-ui-react';
       onSearch(`?name=${searchTerm}`);
     }
   
+    
     function useLocalStorage(key, initialValue) {
       const [storedValue, setStoredValue] = useState(() => {
         try {
